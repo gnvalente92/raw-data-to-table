@@ -1,0 +1,6 @@
+{
+    "credentials_file_path": "/Users/goncalovalente/Desktop/GO/02.Projects/02.HSBC/work/bq-external-table-python/bq_external_table/resources/credentials/hsbc-gv-sandbox-bcab4fc6e84a.json",
+    "dataset_name": "hsbc_dataset",
+    "list_of_buckets": ["hsbc-csv-bucket", "hsbc-avro-bucket"],
+    "log_location": "/Users/goncalovalente/Desktop/GO/02.Projects/02.HSBC/work/logs/bqexternaltableload.log"
+}
