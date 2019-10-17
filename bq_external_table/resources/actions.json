@@ -1,6 +1,23 @@
 {
-    "credentials_file_path": "/Users/goncalovalente/Desktop/GO/02.Projects/02.HSBC/work/bq-external-table-python/bq_external_table/resources/credentials/hsbc-gv-sandbox-bcab4fc6e84a.json",
-    "dataset_name": "hsbc_dataset",
-    "list_of_buckets": ["hsbc-csv-bucket", "hsbc-avro-bucket"],
-    "log_location": "/Users/goncalovalente/Desktop/GO/02.Projects/02.HSBC/work/logs/bqexternaltableload.log"
+  "credentials_file_path": "/Users/goncalovalente/Desktop/GO/02.Projects/02.HSBC/work/bq-external-table-python/bq_external_table/resources/credentials/hsbc-gv-sandbox-bcab4fc6e84a.json",
+  "dataset_name": "hsbc_dataset",
+  "buckets": {
+    "hsbc-csv-bucket": [
+      {
+        "table_name": "hsbc_csv_table",
+        "blob_prefix": "user"
+      }
+    ],
+    "hsbc-avro-bucket": [
+      {
+        "table_name": "hsbc_avro_table_1",
+        "blob_prefix": "userdata1"
+      },
+      {
+        "table_name": "hsbc_avro_table_2",
+        "blob_prefix": "userdata2"
+      }
+    ]
+  },
+  "log_location": "/Users/goncalovalente/Desktop/GO/02.Projects/02.HSBC/work/logs/bqexternaltableload.log"
 }
