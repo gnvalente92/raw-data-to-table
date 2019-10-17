@@ -56,7 +56,7 @@ class TestGCPInterfacer(unittest.TestCase):
         gcp_interfacer.upload_blob(bucket_name=self.bucket_name,
                                    source_file_name=source_file_name,
                                    destination_blob_name=destination_blob_name)
-        actual = gcp_interfacer.get_list_of_blobs(bucket_name=self.bucket_name)
+        actual = gcp_interfacer.get_list_of_blobs(bucket_name=self.bucket_name, blob_prefix=destination_blob_name[0:3])
         gcp_interfacer.delete_blob(bucket_name=self.bucket_name, blob_name=destination_blob_name)
         gcp_interfacer.delete_gcp_storage_bucket(bucket_name=self.bucket_name)
         expected = [destination_blob_name]
@@ -98,11 +98,11 @@ class TestGCPInterfacer(unittest.TestCase):
         gcp_interfacer.create_bigquery_dataset(bigquery_client=self.bigquery_client,
                                                dataset_name=self.dataset_name,
                                                dataset_location="US")
-
         actual = gcp_interfacer.load_bucket_data_into_bigquery_external_table(bigquery_client=self.bigquery_client,
                                                                               dataset_name=self.dataset_name,
                                                                               bucket_name=self.bucket_name,
-                                                                              table_id=self.table_name)
+                                                                              table_id=self.table_name,
+                                                                              blob_prefix=destination_blob_name[0:3])
         self.assertIsNone(actual)
         gcp_interfacer.delete_blob(bucket_name=self.bucket_name, blob_name=destination_blob_name)
         gcp_interfacer.delete_gcp_storage_bucket(bucket_name=self.bucket_name)
@@ -132,7 +132,8 @@ class TestGCPInterfacer(unittest.TestCase):
         actual = gcp_interfacer.load_bucket_data_into_bigquery_external_table(bigquery_client=self.bigquery_client,
                                                                               dataset_name=self.dataset_name,
                                                                               bucket_name=self.bucket_name,
-                                                                              table_id=self.table_name)
+                                                                              table_id=self.table_name,
+                                                                              blob_prefix=destination_blob_name_1[0:3])
         self.assertIsNone(actual)
         gcp_interfacer.delete_blob(bucket_name=self.bucket_name, blob_name=destination_blob_name_1)
         gcp_interfacer.delete_blob(bucket_name=self.bucket_name, blob_name=destination_blob_name_2)

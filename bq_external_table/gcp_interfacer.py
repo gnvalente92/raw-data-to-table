@@ -28,7 +28,6 @@ def get_bigquery_client():
     return bigquery.Client()
 
 
-# TODO Implement functionality for a list of buckets.
 def create_gcp_storage_bucket(bucket_name):
     """
     Method that creates a GCP storage bucket.
@@ -40,7 +39,6 @@ def create_gcp_storage_bucket(bucket_name):
     log.info('Bucket {} created'.format(bucket.name))
 
 
-# TODO Implement functionality for a list of buckets.
 def delete_gcp_storage_bucket(bucket_name):
     """
     Method that deletes a GCP storage bucket. Bucket must be empty.
@@ -53,7 +51,6 @@ def delete_gcp_storage_bucket(bucket_name):
     log.info('Bucket {} deleted'.format(bucket.name))
 
 
-# TODO Implement functionality for a list of files or all files in local folder.
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
     """
     Method that uploads objects to Cloud Storage bucket
@@ -69,17 +66,17 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
     log.info('File {} uploaded to {}.'.format(source_file_name, destination_blob_name))
 
 
-def get_list_of_blobs(bucket_name):
+def get_list_of_blobs(bucket_name, blob_prefix):
     """
-    Method that lists objects in Cloud Storage bucket
+    Method that lists objects in a Cloud Storage bucket, according to a certain prefix, used for filtering.
 
     :param bucket_name: The name of the GCP bucket.
+    :param blob_prefix: The string prefix used to filter blobs to load.
     :return The list of objects in the bucket.
     """
-    return [blob.name for blob in storage.Client().list_blobs(bucket_name)]
+    return [blob.name for blob in storage.Client().list_blobs(bucket_name) if blob.name.startswith(blob_prefix)]
 
 
-# TODO Implement functionality for a list of blobs to delete.
 def delete_blob(bucket_name, blob_name):
     """
     Method that deletes objects in Cloud Storage bucket
@@ -96,11 +93,11 @@ def delete_blob(bucket_name, blob_name):
 
 def create_bigquery_dataset(bigquery_client, dataset_name, dataset_location):
     """
-    Method that creates a GCP BigQuery dataset.
+    Method that creates a GCP BigQuery data set.
 
     :param bigquery_client: The GCP BigQuery client.
     :param dataset_name: The dataset name.
-    :param dataset_location: The dataset location.
+    :param dataset_location: The data set location.
     """
     dataset_id = get_dataset_id(bigquery_client=bigquery_client, dataset_name=dataset_name)
     dataset = bigquery.Dataset(dataset_id)
@@ -115,43 +112,42 @@ def get_dataset_id(bigquery_client, dataset_name):
 
     :param bigquery_client: The GCP BigQuery client.
     :param dataset_name: The dataset name.
-    :return: The dataset id.
+    :return: The data set id.
     """
     return "{}.{}".format(bigquery_client.project, dataset_name)
 
 
 def delete_bigquery_dataset(bigquery_client, dataset_name):
     """
-    Method that deletes a GCP BigQuery dataset.
+    Method that deletes a GCP BigQuery data set.
 
     :param bigquery_client: The GCP BigQuery client.
-    :param dataset_name: The dataset name.
+    :param dataset_name: The data set name.
     """
     dataset_id = get_dataset_id(bigquery_client=bigquery_client, dataset_name=dataset_name)
     bigquery_client.delete_dataset(dataset_id, delete_contents=True, not_found_ok=True)
     log.info("Deleted dataset '{}'.".format(dataset_id))
 
 
-def load_bucket_data_into_bigquery_external_table(bigquery_client, dataset_name, bucket_name, table_id):
+def load_bucket_data_into_bigquery_external_table(bigquery_client, dataset_name, bucket_name, table_id, blob_prefix):
     """
-    Method that loads raw data from a GCP storage bucket into a GCP BigQuery external table.
+    Method that loads raw data of files with a prefix from a GCP storage bucket into a GCP BigQuery external table.
 
     :param bigquery_client: The GCP BigQuery client.
-    :param dataset_name: The name of the dataset.
+    :param dataset_name: The name of the data set.
     :param bucket_name: The name of the bucket.
     :param table_id: The table id.
+    :param blob_prefix: The string prefix used to select the blobs to load.
     """
     dataset_ref = bigquery_client.dataset(dataset_name)
     job_config = bigquery.LoadJobConfig()
-    list_of_blobs = get_list_of_blobs(bucket_name=bucket_name)
-    # TODO Make this dynamic and general (not just for CSV or AVRO) and add to failfast implementation
+    list_of_blobs = get_list_of_blobs(bucket_name=bucket_name, blob_prefix=blob_prefix)
     if get_blob_type(list_of_blobs) == "CSV":
         job_config.source_format = bigquery.SourceFormat.CSV
         job_config.autodetect = True
     else:
         job_config.source_format = bigquery.SourceFormat.AVRO
 
-    # TODO make it functional - map
     for blob in list_of_blobs:
         load_job(bigquery_client=bigquery_client,
                  bucket_name=bucket_name,
@@ -161,7 +157,6 @@ def load_bucket_data_into_bigquery_external_table(bigquery_client, dataset_name,
                  table_id=table_id)
 
 
-# TODO failfast implementation should fail if there is more than one type of files in a bucket.
 def get_blob_type(list_of_blobs):
     """
     Method that gets the type of objects in a bucket.
@@ -169,7 +164,6 @@ def get_blob_type(list_of_blobs):
     :param list_of_blobs: The list with all the objects in a bucket.
     :return: The bucket object type.
     """
-    # TODO make it pretty
     return [blob.split(".")[-1] for blob in list_of_blobs][0].upper()
 
 
@@ -180,14 +174,14 @@ def load_job(bigquery_client, bucket_name, file_name, dataset_ref, job_config, t
     :param bigquery_client: The GCP BigQuery client.
     :param bucket_name: The bucket name.
     :param file_name: The file name.
-    :param dataset_ref: The dataset reference.
+    :param dataset_ref: The data set reference.
     :param job_config: The load job config.
     :param table_id: The table id.
     """
     uri = "gs://{}/{}".format(bucket_name, file_name)
-    load_job = bigquery_client.load_table_from_uri(uri, dataset_ref.table(table_id), job_config=job_config)
-    log.info("Starting job {}".format(load_job.job_id))
-    load_job.result()
+    load_job_details = bigquery_client.load_table_from_uri(uri, dataset_ref.table(table_id), job_config=job_config)
+    log.info("Starting job {}".format(load_job_details.job_id))
+    load_job_details.result()
     log.info("Job finished.")
     destination_table = bigquery_client.get_table(dataset_ref.table(table_id))
     log.info("Loaded {} rows.".format(destination_table.num_rows))

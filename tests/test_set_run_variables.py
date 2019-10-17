@@ -10,7 +10,7 @@ class TestSetRunVariables(unittest.TestCase):
 
     def test_set_run_variables(self):
         json_config = utils_functions.load_json_config(os.path.abspath("bq_external_table/resources/actions.json"))
-        expected = "ad6c13ba8ff9982acade80766126950269419e45f949a359ac710a98b9d37092"
+        expected = "ab4210c90c16151ee38d7210b07dcb2d3e79f93b068668a6e837172e400b0f7b"
         actual = hashlib.sha256(str(set_run_variables(json_config=json_config)).encode()).hexdigest()
         self.assertEqual(expected, actual)
 

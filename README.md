@@ -4,8 +4,9 @@ This application deals with data migration between GCP buckets and BigQuery exte
 
 ## Assumptions
  - This implementation requires that the user that will run the project has a GOOGLE_APPLICATION_CREDENTIALS json file with the appropriate permissions to run the required actions.
+ - All blobs in one bucket must be of the same file type (meaning one bucket can only have csv files or avro files, not a mix of both).
  
- ## Requirements for running the code
+## Requirements for running the code
  
 The developments were made under the assumption that there will be one run for each data set in BigQuery. For each data set, meaning each run, these are the steps for required:
 
